@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Creator</title>
+<style>
+  :root { --bg:#0b1020; --card:#131a2e; --text:#e5e7eb; --muted:#9ca3af; --accent:#2563eb; --accent2:#60a5fa; --border:#1f2a44; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:radial-gradient(1200px 600px at 50% -10%, #1e3a8a55, transparent), var(--bg);
+         color:var(--text); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; display:flex; flex-direction:column; align-items:center; padding:48px 16px; }
+  h1 { font-size:clamp(28px,6vw,44px); margin:0 0 8px; letter-spacing:-.02em; }
+  h1 span { color:var(--accent2); }
+  p.lead { color:var(--muted); margin:0 0 28px; text-align:center; max-width:560px; }
+  form { display:flex; gap:8px; width:100%; max-width:640px; }
+  input { flex:1; min-width:0; padding:14px 16px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:16px; outline:none; }
+  input:focus { border-color:var(--accent2); }
+  button { padding:14px 20px; border:0; border-radius:12px; background:var(--accent); color:#fff; font-size:16px; font-weight:600; cursor:pointer; }
+  button:hover { filter:brightness(1.1); }
+  .loc { margin-top:28px; padding:14px 18px; border:1px solid var(--border); border-radius:12px; background:var(--card); width:100%; max-width:640px; display:flex; gap:12px; align-items:center; }
+  .flag { font-size:28px; }
+  .loc small { color:var(--muted); display:block; }
+  .quick { margin-top:20px; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:640px; }
+  .quick a { color:var(--text); text-decoration:none; padding:6px 12px; border:1px solid var(--border); border-radius:999px; background:var(--card); font-size:14px; }
+  .quick a:hover { border-color:var(--accent2); }
+  footer { margin-top:auto; padding-top:40px; color:var(--muted); font-size:13px; text-align:center; max-width:640px; }
+</style>
+</head>
+<body>
+  <h1>Server <span>Creator</span></h1>
+  <p class="lead">Open any website through this server. The website sees the server's location — not yours.</p>
+
+  <form action="/go" method="get">
+    <input name="url" placeholder="Enter a website, e.g. gulfnews.com" autofocus autocomplete="off" required>
+    <button type="submit">Open</button>
+  </form>
+
+  <div class="loc" id="loc">
+    <div class="flag" id="flag">🌐</div>
+    <div><small>Websites will see you browsing from</small><strong id="where">Detecting server location…</strong></div>
+  </div>
+
+  <div class="quick">
+    <a href="/go?url=gulfnews.com">Gulf News</a>
+    <a href="/go?url=khaleejtimes.com">Khaleej Times</a>
+    <a href="/go?url=ipinfo.io">Check my IP</a>
+    <a href="/go?url=example.com">example.com</a>
+  </div>
+
+  <footer>To browse from the UAE (or any country), run this server on a host located in that country. See README.md.</footer>
+
+<script>
+  const flag = (cc) => cc && cc.length === 2 ? String.fromCodePoint(...[...cc.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '🌐';
+  fetch('/api/location').then(r => r.json()).then(d => {
+    if (d.error) throw 0;
+    document.getElementById('flag').textContent = flag(d.country);
+    document.getElementById('where').textContent = [d.city, d.region, d.country].filter(Boolean).join(', ') + (d.ip ? '  ·  ' + d.ip : '');
+  }).catch(() => { document.getElementById('where').textContent = 'Unknown (location lookup failed)'; });
+</script>
+</body>
+</html>

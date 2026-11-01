@@ -1,0 +1,16 @@
+{
+  "name": "server-creator",
+  "version": "1.0.0",
+  "description": "Open any website through this server, so the site sees the server's location instead of yours.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "undici": "^6.21.0"
+  },
+  "license": "MIT"
+}
