@@ -3,6 +3,7 @@
 # Usage (run on the server):
 #   curl -fsSL https://raw.githubusercontent.com/zzohranzebnvdmgpnty-cpu/Create-A-Server/main/deploy.sh | sudo PROXY_PASSWORD=yourpassword bash
 # Optional: DOMAIN=proxy.example.com  -> automatic HTTPS via Caddy (point the domain's DNS to this server first)
+# Optional: TELEGRAM_BOT_TOKEN=123:abc TELEGRAM_ALLOWED_USERS=11111111  -> enable the Telegram bot
 set -euo pipefail
 
 if [ "$(id -u)" -ne 0 ]; then echo "Please run as root (use sudo)."; exit 1; fi
@@ -30,6 +31,12 @@ npm install --omit=dev
 PORT=80
 [ -n "${DOMAIN:-}" ] && PORT=3000
 
+if [ -n "${DOMAIN:-}" ]; then
+  URL="https://$DOMAIN"
+else
+  URL="http://$(curl -fsS https://api.ipify.org || echo YOUR-SERVER-IP)"
+fi
+
 echo ">> Creating background service..."
 cat > /etc/systemd/system/server-creator.service <<EOF
 [Unit]
@@ -42,6 +49,9 @@ ExecStart=$(command -v node) server.js
 Environment=PORT=$PORT
 Environment=PROXY_PASSWORD=$PROXY_PASSWORD
 Environment=UPSTREAM_PROXY=${UPSTREAM_PROXY:-}
+Environment=TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+Environment=TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-}
+Environment=PUBLIC_URL=${PUBLIC_URL:-$URL}
 Restart=always
 
 [Install]
@@ -61,9 +71,6 @@ if [ -n "${DOMAIN:-}" ]; then
   reverse_proxy localhost:3000
 }" > /etc/caddy/Caddyfile
   systemctl restart caddy
-  URL="https://$DOMAIN"
-else
-  URL="http://$(curl -fsS https://api.ipify.org || echo YOUR-SERVER-IP)"
 fi
 
 # Open the firewall if ufw is active
@@ -74,5 +81,6 @@ echo "=============================================="
 echo " Server Creator is running!"
 echo " Open: $URL"
 echo " Password: $PROXY_PASSWORD (any username)"
+[ -n "${TELEGRAM_BOT_TOKEN:-}" ] && echo " Telegram bot: enabled (send /start to your bot)"
 echo " Also allow ports 80/443 in your cloud firewall / security group."
 echo "=============================================="

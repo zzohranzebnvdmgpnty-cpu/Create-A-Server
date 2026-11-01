@@ -20,6 +20,12 @@ const UPSTREAM_PROXY = process.env.UPSTREAM_PROXY || '';
 const PROXY_PASSWORD = process.env.PROXY_PASSWORD || '';
 // For local testing only: allow opening localhost / private network addresses.
 const ALLOW_PRIVATE_HOSTS = process.env.ALLOW_PRIVATE_HOSTS === '1';
+// Optional Telegram bot (see bot.js): token from @BotFather.
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+// Comma-separated Telegram user ids allowed to use the bot (send /id to the bot to get yours).
+const TELEGRAM_ALLOWED_USERS = (process.env.TELEGRAM_ALLOWED_USERS || '').split(',').map((s) => s.trim()).filter(Boolean);
+// Public address of this server, used for tap-to-open links in Telegram, e.g. https://proxy.example.com
+const PUBLIC_URL = process.env.PUBLIC_URL || '';
 
 const dispatcher = UPSTREAM_PROXY ? new ProxyAgent(UPSTREAM_PROXY) : new Agent();
 const PREFIX = '/p/';
@@ -290,3 +296,17 @@ server.listen(PORT, () => {
   if (UPSTREAM_PROXY) console.log('Outgoing traffic is routed through UPSTREAM_PROXY');
   if (!PROXY_PASSWORD) console.log('Tip: set PROXY_PASSWORD so strangers cannot use your server.');
 });
+
+if (TELEGRAM_BOT_TOKEN) {
+  require('./bot').startBot({
+    token: TELEGRAM_BOT_TOKEN,
+    allowedUsers: TELEGRAM_ALLOWED_USERS,
+    publicUrl: PUBLIC_URL,
+    apiBase: process.env.TELEGRAM_API_BASE,
+    dispatcher,
+    normalizeInput,
+    assertPublicHost,
+    upstreamProxy: UPSTREAM_PROXY,
+    prefix: PREFIX,
+  });
+}

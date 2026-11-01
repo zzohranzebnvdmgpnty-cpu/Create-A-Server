@@ -50,6 +50,35 @@ curl -fsSL https://raw.githubusercontent.com/zzohranzebnvdmgpnty-cpu/Create-A-Se
 
 The script installs Node.js and runs Server Creator as a service that restarts automatically. Add `DOMAIN=proxy.yourdomain.com` before `bash` to get automatic HTTPS (point the domain's DNS at the server first). Run it again later to update.
 
+## Telegram bot
+
+Control your server from Telegram. Send it a website and it opens it **from the server's location**, replies with the page title, a text preview, the status code, and a button to open it through your server.
+
+1. In Telegram, message [@BotFather](https://t.me/BotFather), send `/newbot`, and copy the token.
+2. Start the server with the token:
+
+```bash
+TELEGRAM_BOT_TOKEN=123456:ABC... PUBLIC_URL=https://proxy.yourdomain.com PROXY_PASSWORD=choose-a-password npm start
+```
+
+3. Send `/id` to your bot, then restart with `TELEGRAM_ALLOWED_USERS=<your id>` so only you can use it.
+
+With the deploy script, add the variables before `bash`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/zzohranzebnvdmgpnty-cpu/Create-A-Server/main/deploy.sh | sudo PROXY_PASSWORD=choose-a-password TELEGRAM_BOT_TOKEN=123456:ABC... TELEGRAM_ALLOWED_USERS=11111111 bash
+```
+
+| Command | What it does |
+|---|---|
+| any text, or `/open gulfnews.com` | Opens the site from the server, shows title + preview + "Open through server" button |
+| `/location` | Country, city and IP that websites see |
+| `/check gulfnews.com` | Status code and response time only |
+| `/status` | Server uptime |
+| `/id` | Your Telegram user id |
+
+The bot uses long polling, so it needs no webhook, domain or extra open port.
+
 ## Settings (environment variables)
 
 | Variable | Meaning |
@@ -57,6 +86,9 @@ The script installs Node.js and runs Server Creator as a service that restarts a
 | `PORT` | Port to listen on (default `3000`). |
 | `PROXY_PASSWORD` | Asks for a password before anyone can use the server. **Set this on any public server** so strangers can't use your bandwidth. Any username works. |
 | `UPSTREAM_PROXY` | Send all outgoing traffic through another HTTP proxy, e.g. one located in the UAE. |
+| `TELEGRAM_BOT_TOKEN` | Turns on the Telegram bot (token from @BotFather). |
+| `TELEGRAM_ALLOWED_USERS` | Comma-separated Telegram user ids allowed to use the bot. If empty, anyone can use it. |
+| `PUBLIC_URL` | Public address of the server (e.g. `https://proxy.yourdomain.com`), used for the bot's tap-to-open links. Set automatically by `deploy.sh`. |
 | `ALLOW_PRIVATE_HOSTS` | `1` allows opening localhost and private network addresses. For local testing only. |
 
 ## How it works
