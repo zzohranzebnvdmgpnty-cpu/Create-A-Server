@@ -37,16 +37,18 @@ docker build -t server-creator .
 docker run -d -p 80:3000 -e PROXY_PASSWORD=choose-a-password server-creator
 ```
 
-### Quick setup on a UAE VM (Ubuntu)
+### One-command deploy on a UAE server (Ubuntu)
+
+1. Create an Ubuntu VM in a UAE region (AWS `me-central-1`, Azure *UAE North*, Oracle Cloud *UAE East (Dubai)*), and allow ports 80 and 443 in its firewall or security group.
+2. SSH in and run:
 
 ```bash
-sudo apt update && sudo apt install -y nodejs npm git
-git clone https://github.com/zzohranzebnvdmgpnty-cpu/Create-A-Server.git
-cd Create-A-Server && npm install
-PORT=80 PROXY_PASSWORD=choose-a-password sudo -E node server.js
+curl -fsSL https://raw.githubusercontent.com/zzohranzebnvdmgpnty-cpu/Create-A-Server/main/deploy.sh | sudo PROXY_PASSWORD=choose-a-password bash
 ```
 
-Then open `http://<your-server-ip>/` from your phone or PC in Pakistan. Open port 80 in the cloud provider's firewall or security group. For HTTPS, put it behind Caddy or Nginx with a domain.
+3. Open the address it prints (`http://<server-ip>`) from your phone or PC in Pakistan.
+
+The script installs Node.js and runs Server Creator as a service that restarts automatically. Add `DOMAIN=proxy.yourdomain.com` before `bash` to get automatic HTTPS (point the domain's DNS at the server first). Run it again later to update.
 
 ## Settings (environment variables)
 
